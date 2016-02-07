@@ -30,8 +30,7 @@ class Recursor
 
     private function execute(\Generator $generator)
     {
-        $stack = new \SplStack();
-        $stack->push($generator);
+        $stack = [$generator];
 
         $done = false;
         //This is basically a simple iterative in-order tree traversal algorithm
@@ -43,22 +42,22 @@ class Recursor
             //If it is a generator
             while ($yielded instanceof \Generator) {
                 //... push it to the stack
-                $stack->push($yielded);
+                $stack[] = $yielded;
 
                 //... run it, and mark it as the current active generator
                 $yielded = $yielded->current();
             }
 
             //at this point the current generator is done (i.e. a non-generator was yielded), so remove it from the stack
-            $stack->pop();
+            array_pop($stack);
 
             //check if there are unfinished generators
-            if ($stack->isEmpty()) {
+            if (empty($stack)) {
                 //if not (the stack is empty), we're done
                 $done = true;
             } else {
                 //get the next generator from the stack
-                $generator = $stack->top();
+                $generator = end($stack);
 
                 //run the next generator
                 $yielded = $generator->send($yielded);

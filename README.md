@@ -38,4 +38,6 @@ Downsides
 --------
 
 Recursor relies heavily on generators. Each recursive call instantiates and executes a generator, which has a certain
-CPU and memory overhead. Because of this, relying on Recurson in performance-sensitive applications is not recommended.
+CPU and memory overhead. Also, the actual executor function is quite complicated which imposes even more overhead.
+Because of this, relying on Recurson in performance-sensitive applications is not recommended and an iterative solution
+should be implemented.

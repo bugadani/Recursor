@@ -1,0 +1,29 @@
+{
+  "name": "bugadani/recursor",
+  "description": "A simple library to enable quasi-recursive execution",
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "type": "library",
+  "require": {
+    "php": ">=5.5"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.*"
+  },
+  "authors": [
+    {
+      "name": "Dániel Buga",
+      "email": "bugadani@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Recursor\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Recursor\\Test\\": "test/"
+    }
+  }
+}

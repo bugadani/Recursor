@@ -9,7 +9,7 @@ php:
 
 matrix:
   allow_failtures:
-    - hhvm
+    - php: hhvm
 
 before_script:
   - composer --prefer-source --dev install

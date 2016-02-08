@@ -30,39 +30,36 @@ class Recursor
 
     private function execute(\Generator $generator)
     {
-        $stack = [$generator];
+        $stack = [];
 
-        $done = false;
         //This is basically a simple iterative in-order tree traversal algorithm
-
-        //Get the first yielded value
         $yielded = $generator->current();
 
-        do {
-            //If it is a generator
+        //This is a depth-first traversal
+        while ($yielded instanceof \Generator) {
+            //... push it to the stack
+            $stack[] = $generator;
+
+            $generator = $yielded;
+            $yielded   = $generator->current();
+        }
+
+        while (!empty($stack)) {
+            //We've reached the end of the branch, let's step back on the stack
+            $generator = array_pop($stack);
+
+            //step the generator
+            $yielded = $generator->send($yielded);
+
+            //Depth-first traversal
             while ($yielded instanceof \Generator) {
                 //... push it to the stack
-                $stack[] = $yielded;
+                $stack[] = $generator;
 
-                //... run it, and mark it as the current active generator
-                $yielded = $yielded->current();
+                $generator = $yielded;
+                $yielded   = $generator->current();
             }
-
-            //at this point the current generator is done (i.e. a non-generator was yielded), so remove it from the stack
-            array_pop($stack);
-
-            //check if there are unfinished generators
-            if (empty($stack)) {
-                //if not (the stack is empty), we're done
-                $done = true;
-            } else {
-                //get the next generator from the stack
-                $generator = end($stack);
-
-                //run the next generator
-                $yielded = $generator->send($yielded);
-            }
-        } while (!$done);
+        }
 
         return $yielded;
     }

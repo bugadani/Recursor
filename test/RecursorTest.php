@@ -10,13 +10,13 @@ class RecursorTest extends \PHPUnit_Framework_TestCase
     {
         $fibonacci = function ($x) use (&$fibonacci) {
             if ($x === 0) {
-                yield 0;
+                return 0;
             } else if ($x === 1) {
-                yield 1;
+                return 1;
             } else {
                 $x1 = (yield $fibonacci($x - 1));
                 $x2 = (yield $fibonacci($x - 2));
-                yield $x1 + $x2;
+                return $x1 + $x2;
             }
         };
 
@@ -33,10 +33,10 @@ class RecursorTest extends \PHPUnit_Framework_TestCase
                 foreach ($x as $y) {
                     $string .= (yield $traverse($y));
                 }
-                yield $string;
+                return $string;
 
             } else {
-                yield $x;
+                return $x;
             }
         };
 

@@ -7,9 +7,6 @@ namespace Recursor;
  * This is especially useful in PHP because the language imposes an artificial nesting limit.
  *
  * In order for a function to be executed, each recursive call must be yielded.
- * The last yield may be a scalar value; that value will be returned by this method.
- *
- * If a generator is to be yielded but should not be executed, it should be wrapped in \IteratorIterator.
  *
  * @param \Generator $generator
  *
@@ -21,11 +18,11 @@ class Recursor
     /**
      * @var callable
      */
-    private $callback;
+    private $quasiRecursiveFunction;
 
     public function __construct(callable $callback)
     {
-        $this->callback = $callback;
+        $this->quasiRecursiveFunction = $callback;
     }
 
     private function execute(\Generator $generator)
@@ -43,6 +40,7 @@ class Recursor
             $generator = $yielded;
             $yielded   = $generator->current();
         }
+        $yielded = $generator->getReturn();
 
         while (!empty($stack)) {
             //We've reached the end of the branch, let's step back on the stack
@@ -59,15 +57,16 @@ class Recursor
                 $generator = $yielded;
                 $yielded   = $generator->current();
             }
+            $yielded = $generator->getReturn();
         }
 
         return $yielded;
     }
 
-    public function __invoke()
+    public function __invoke(...$args)
     {
-        $generator = call_user_func_array($this->callback, func_get_args());
+        $callback  = $this->quasiRecursiveFunction;
 
-        return $this->execute($generator);
+        return $this->execute($callback(...$args));
     }
 }

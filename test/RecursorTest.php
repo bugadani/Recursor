@@ -59,4 +59,19 @@ class RecursorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('abcdef', $wrapped($tree));
     }
+
+    public function testScalarValueIsSentBack()
+    {
+        $function = function () use (&$function) {
+            if (yield true) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        $wrapped = new Recursor($function);
+
+        $this->assertTrue($wrapped());
+    }
 }

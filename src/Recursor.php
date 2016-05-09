@@ -40,7 +40,11 @@ class Recursor
             $generator = $yielded;
             $yielded   = $generator->current();
         }
-        $yielded = $generator->getReturn();
+        if ($generator->valid()) {
+            array_push($stack, $generator);
+        } else {
+            $yielded = $generator->getReturn();
+        }
 
         while (!empty($stack)) {
             //We've reached the end of the branch, let's step back on the stack
@@ -57,7 +61,11 @@ class Recursor
                 $generator = $yielded;
                 $yielded   = $generator->current();
             }
-            $yielded = $generator->getReturn();
+            if ($generator->valid()) {
+                array_push($stack, $generator);
+            } else {
+                $yielded = $generator->getReturn();
+            }
         }
 
         return $yielded;
@@ -65,7 +73,7 @@ class Recursor
 
     public function __invoke(...$args)
     {
-        $callback  = $this->quasiRecursiveFunction;
+        $callback = $this->quasiRecursiveFunction;
 
         return $this->execute($callback(...$args));
     }

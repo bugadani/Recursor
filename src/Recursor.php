@@ -19,6 +19,7 @@ class Recursor
      * @var callable
      */
     private $quasiRecursiveFunction;
+    private $stack = [];
 
     public function __construct(callable $callback)
     {
@@ -27,45 +28,39 @@ class Recursor
 
     private function execute(\Generator $generator)
     {
-        $stack = [];
+        $yielded = $this->traverseDepth($generator);
 
-        //This is basically a simple iterative in-order tree traversal algorithm
+        while (!empty($this->stack)) {
+            //We've reached the end of the branch, let's step back on the stack
+            $generator = array_pop($this->stack);
+
+            //step the generator
+            $generator->send($yielded);
+            $yielded = $this->traverseDepth($generator);
+        }
+
+        return $yielded;
+    }
+
+    /**
+     * @param \Generator $generator
+     * @return mixed The return value of the deepest generator
+     * @internal param $stack
+     */
+    private function traverseDepth(\Generator $generator)
+    {
         $yielded = $generator->current();
-
-        //This is a depth-first traversal
         while ($yielded instanceof \Generator) {
             //... push it to the stack
-            $stack[] = $generator;
+            $this->stack[] = $generator;
 
             $generator = $yielded;
             $yielded   = $generator->current();
         }
         if ($generator->valid()) {
-            array_push($stack, $generator);
+            array_push($this->stack, $generator);
         } else {
             $yielded = $generator->getReturn();
-        }
-
-        while (!empty($stack)) {
-            //We've reached the end of the branch, let's step back on the stack
-            $generator = array_pop($stack);
-
-            //step the generator
-            $yielded = $generator->send($yielded);
-
-            //Depth-first traversal
-            while ($yielded instanceof \Generator) {
-                //... push it to the stack
-                $stack[] = $generator;
-
-                $generator = $yielded;
-                $yielded   = $generator->current();
-            }
-            if ($generator->valid()) {
-                array_push($stack, $generator);
-            } else {
-                $yielded = $generator->getReturn();
-            }
         }
 
         return $yielded;

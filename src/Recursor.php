@@ -70,6 +70,12 @@ class Recursor
     {
         $callback = $this->quasiRecursiveFunction;
 
-        return $this->execute($callback(...$args));
+        $generator = $callback(...$args);
+
+        if (!$generator instanceof \Generator) {
+            return $generator;
+        }
+
+        return $this->execute($generator);
     }
 }
